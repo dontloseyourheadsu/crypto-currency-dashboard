@@ -29,3 +29,4 @@ git clone https://github.com/yourusername/angular-crypto-dashboard.git
 cd angular-crypto-dashboard
 npm install
 ng serve
+```
