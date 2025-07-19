@@ -5,9 +5,8 @@ import { Mainlayout } from "./shared/layout/mainlayout/mainlayout/mainlayout";
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, NavMenu, Mainlayout],
+  imports: [RouterOutlet, Mainlayout],
   templateUrl: './app.html',
-  styleUrl: './app.css'
 })
 export class App {
   protected title = 'crypto-currency-dashboard';
