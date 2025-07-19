@@ -1,0 +1,111 @@
+/* Nav Link Base Styles */
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  font-family: var(--font-family-primary);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  outline: none;
+  background: none;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  background-color: transparent;
+}
+
+.nav-link:focus {
+  outline: 2px solid var(--primary-purple);
+  outline-offset: 2px;
+}
+
+.nav-link:hover:not(.nav-link--disabled) {
+  background-color: var(--bg-hover);
+}
+
+/* Nav Link Variants - Primary */
+.nav-link--primary {
+  color: var(--text-accent);
+}
+
+.nav-link--primary:hover:not(.nav-link--disabled) {
+  color: var(--primary-purple-light);
+  background-color: rgba(139, 92, 246, 0.1);
+  border-color: var(--primary-purple);
+}
+
+/* Active state for nav primary links */
+.nav-link--primary.router-link-active {
+  color: var(--primary-purple);
+  background-color: rgba(139, 92, 246, 0.15);
+  border-color: var(--primary-purple);
+}
+
+/* Nav Link Variants - Secondary */
+.nav-link--secondary {
+  color: var(--text-secondary);
+}
+
+.nav-link--secondary:hover:not(.nav-link--disabled) {
+  color: var(--text-primary);
+  background-color: var(--bg-hover);
+}
+
+/* Nav Link Variants - Accent */
+.nav-link--accent {
+  color: var(--text-accent);
+}
+
+.nav-link--accent:hover:not(.nav-link--disabled) {
+  color: var(--primary-purple-light);
+}
+
+/* Nav Link Variants - Muted */
+.nav-link--muted {
+  color: var(--text-muted);
+}
+
+.nav-link--muted:hover:not(.nav-link--disabled) {
+  color: var(--text-secondary);
+}
+
+/* Nav Link Sizes */
+.nav-link--sm {
+  font-size: var(--text-sm);
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+}
+
+.nav-link--base {
+  font-size: var(--text-base);
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.nav-link--lg {
+  font-size: var(--text-lg);
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-lg);
+}
+
+/* Disabled State */
+.nav-link--disabled {
+  color: var(--text-muted) !important;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.nav-link--disabled:hover {
+  color: var(--text-muted) !important;
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+
+/* External link indicator */
+.nav-link[target="_blank"]::after {
+  content: '↗';
+  margin-left: var(--spacing-xs);
+  font-size: 0.8em;
+  opacity: 0.7;
+}

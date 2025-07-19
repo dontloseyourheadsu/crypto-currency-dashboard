@@ -7,13 +7,16 @@ export type ButtonSize = 'sm' | 'md' | 'lg';
   selector: 'app-button',
   imports: [],
   templateUrl: './button.html',
-  styleUrl: './button.css'
+  styleUrl: './button.css',
+  standalone: true,
 })
 export class Button {
   @Input() variant: ButtonVariant = 'primary';
   @Input() size: ButtonSize = 'md';
   @Input() disabled: boolean = false;
   @Input() type: 'button' | 'submit' | 'reset' = 'button';
+  @Input() ariaLabel?: string;
+  @Input() ariaDescribedBy?: string;
   
   @Output() clicked = new EventEmitter<Event>();
 
