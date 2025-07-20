@@ -284,3 +284,5 @@ p {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--primary-purple-dark);
 }
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

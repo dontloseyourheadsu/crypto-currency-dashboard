@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavMenu } from '../../nav-menu/nav-menu';
+import { NavMenu } from '../nav-menu/nav-menu';
 
 @Component({
   selector: 'app-mainlayout',
