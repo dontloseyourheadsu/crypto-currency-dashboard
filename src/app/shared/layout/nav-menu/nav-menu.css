@@ -1,29 +1,88 @@
-nav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background-color: var(--bg-primary);
-    padding: var(--spacing-md) var(--spacing-lg);
-    border-bottom: 1px solid var(--border-primary);
-    box-shadow: var(--shadow-sm);
+.sidenav-container {
+  height: 100vh;
 }
 
-nav h1 {
-    color: var(--text-primary);
-    font-size: var(--text-xl);
-    margin: 0;
-    font-weight: 600;
+.sidenav {
+  width: 200px;
 }
 
-nav>ul {
-    display: flex;
-    list-style: none;
-    align-items: center;
-    padding: 0;
-    margin: 0;
-    gap: var(--spacing-sm);
+.sidenav .mat-toolbar {
+  background: inherit;
 }
 
-nav>ul>li {
-    margin: 0;
+.main-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.app-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-right: auto;
+}
+
+.desktop-nav {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.desktop-nav a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+}
+
+.desktop-nav a mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.active-link {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.active-button {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Mobile-specific styles */
+@media (max-width: 768px) {
+  .app-title {
+    font-size: 1.25rem;
+  }
+  
+  .sidenav {
+    width: 250px;
+  }
+}
+
+/* Content area styling */
+mat-sidenav-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Navigation list styling */
+mat-nav-list a {
+  color: inherit;
+  text-decoration: none;
+}
+
+mat-nav-list a:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+/* Dark theme compatibility */
+.mat-sidenav-container {
+  background-color: var(--bg-primary, #fafafa);
+  color: var(--text-primary, #000);
 }
