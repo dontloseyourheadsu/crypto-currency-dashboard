@@ -10,6 +10,7 @@ import { Subject, takeUntil, interval, switchMap, startWith } from 'rxjs';
 
 import { CoinGeckoService } from '../../services/coingecko.service';
 import { CoinDetails, CoinMarketData } from '../../models/coingecko.interfaces';
+import { PriceChartComponent } from '../../../shared/features/price-chart/price-chart.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -20,7 +21,8 @@ import { CoinDetails, CoinMarketData } from '../../models/coingecko.interfaces';
     MatButtonModule, 
     MatChipsModule,
     MatProgressSpinnerModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    PriceChartComponent
   ],
   template: `
     <div class="dashboard-container">
@@ -146,6 +148,14 @@ import { CoinDetails, CoinMarketData } from '../../models/coingecko.interfaces';
           </div>
         </mat-card-content>
       </mat-card>
+
+      <!-- Price Chart -->
+      <app-price-chart 
+        *ngIf="selectedCoin && selectedCoinDetail"
+        [coinId]="selectedCoin"
+        [coinName]="selectedCoinDetail.name"
+        [currentPrice]="selectedCoinDetail.current_price">
+      </app-price-chart>
 
       <!-- Auto-update info -->
       <div class="update-info" *ngIf="!isLoading && coinData.length > 0">
