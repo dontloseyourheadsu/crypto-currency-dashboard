@@ -1,0 +1,130 @@
+.price-chart-card {
+  margin: 16px 0;
+  max-width: 100%;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.loading-container p {
+  margin-top: 16px;
+  color: #666;
+}
+
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.error-message {
+  color: #f44336;
+  margin-bottom: 16px;
+  font-weight: 500;
+}
+
+.chart-container {
+  position: relative;
+  height: 300px;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.chart-container canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+.price-stats {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 8px;
+  margin-top: 16px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 120px;
+}
+
+.stat .label {
+  font-size: 0.9em;
+  color: #666;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.stat .value {
+  font-size: 1.1em;
+  font-weight: 600;
+}
+
+.stat .value.high {
+  color: #4caf50;
+}
+
+.stat .value.low {
+  color: #f44336;
+}
+
+.stat .value.positive {
+  color: #4caf50;
+}
+
+.stat .value.negative {
+  color: #f44336;
+}
+
+/* Responsive design */
+@media (max-width: 600px) {
+  .chart-container {
+    height: 250px;
+  }
+  
+  .price-stats {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .stat {
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 250px;
+  }
+  
+  .stat .label {
+    margin-bottom: 0;
+    margin-right: 8px;
+  }
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+  .price-stats {
+    background: rgba(255, 255, 255, 0.05);
+  }
+  
+  .loading-container p {
+    color: #ccc;
+  }
+  
+  .stat .label {
+    color: #aaa;
+  }
+}

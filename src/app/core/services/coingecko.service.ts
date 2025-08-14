@@ -7,7 +7,9 @@ import {
   SimplePriceData,
   TrendingResponse,
   CoinDetails,
-  CoinGeckoErrorResponse
+  CoinGeckoErrorResponse,
+  CoinHistoryResponse,
+  PriceDataPoint
 } from '../models/coingecko.interfaces';
 
 @Injectable({
@@ -30,6 +32,10 @@ export class CoinGeckoService {
   private marketDataCache = new Map<string, { data: CoinMarketData[], timestamp: number }>();
   private priceCache = new Map<string, { data: SimplePriceData, timestamp: number }>();
   private trendingCache: { data: TrendingResponse, timestamp: number } | null = null;
+  
+  // Historical price data cache
+  private historicalPriceCache = new Map<string, { data: PriceDataPoint[], timestamp: number }>();
+  private readonly PRICE_CACHE_DURATION = 300000; // 5 minutes cache for price data
   
   // Subjects for real-time updates
   private selectedCoinSubject = new BehaviorSubject<string | null>(null);
@@ -209,12 +215,90 @@ export class CoinGeckoService {
   }
   
   /**
+   * Get historical price data for a coin (last 24 hours)
+   * @param coinId - The ID of the coin to get price history for
+   * @param days - Number of days of history to fetch (default: 1)
+   * @returns Observable of price data points
+   */
+  getCoinPriceHistory(coinId: string, days: number = 1): Observable<PriceDataPoint[]> {
+    const cacheKey = `${coinId}_${days}`;
+    const now = Date.now();
+    
+    // Check cache first
+    const cached = this.historicalPriceCache.get(cacheKey);
+    if (cached && (now - cached.timestamp) < this.PRICE_CACHE_DURATION) {
+      return new Observable(observer => {
+        observer.next(cached.data);
+        observer.complete();
+      });
+    }
+
+    const headers = new HttpHeaders({
+      'accept': 'application/json',
+      'x-cg-demo-api-key': this.apiKey
+    });
+
+    const url = `${this.baseUrl}/coins/${coinId}/market_chart`;
+    
+    // According to CoinGecko API free tier restrictions:
+    // - For days=1: returns 5-minute interval data (no need to specify interval)
+    // - For days=2-90: returns hourly data automatically
+    // - interval parameter is Enterprise-only feature
+    let adjustedDays = days;
+    if (days === 1) {
+      // For 24 hours, we'll use 2 days to get hourly data instead of 5-minute data
+      // This gives us better performance and fewer data points to process
+      adjustedDays = 2;
+    }
+    
+    const params = new HttpParams()
+      .set('vs_currency', 'usd')
+      .set('days', adjustedDays.toString());
+      // Removed interval parameter as it's Enterprise-only
+
+    return this.http.get<CoinHistoryResponse>(url, { headers, params }).pipe(
+      map(response => {
+        let prices = response.prices;
+        
+        // If we requested 2 days for 24h data, filter to last 24 hours
+        if (days === 1 && adjustedDays === 2) {
+          const oneDayAgo = Date.now() - (24 * 60 * 60 * 1000);
+          prices = prices.filter(([timestamp]) => timestamp >= oneDayAgo);
+        }
+        
+        // Transform the response to our PriceDataPoint format
+        const priceData: PriceDataPoint[] = prices.map(([timestamp, price]) => ({
+          timestamp,
+          price,
+          date: new Date(timestamp)
+        }));
+
+        // Cache the result
+        this.historicalPriceCache.set(cacheKey, {
+          data: priceData,
+          timestamp: now
+        });
+
+        return priceData;
+      }),
+      catchError(error => {
+        console.error(`Error fetching price history for ${coinId}:`, error);
+        if (error.error?.error) {
+          return throwError(() => new Error(error.error.error));
+        }
+        return throwError(() => new Error('Failed to fetch price history'));
+      })
+    );
+  }
+  
+  /**
    * Force refresh all cached data
    */
   forceRefreshAll(): void {
     this.marketDataCache.clear();
     this.priceCache.clear();
     this.trendingCache = null;
+    this.historicalPriceCache.clear();
     this.refreshNeededSubject.next(false);
   }
   
@@ -225,5 +309,6 @@ export class CoinGeckoService {
     this.marketDataCache.clear();
     this.priceCache.clear();
     this.trendingCache = null;
+    this.historicalPriceCache.clear();
   }
 }

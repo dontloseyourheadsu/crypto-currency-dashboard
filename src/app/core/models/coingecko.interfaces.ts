@@ -99,3 +99,17 @@ export interface CoinGeckoErrorResponse {
   error: string;
   error_code?: number;
 }
+
+// Historical price data interface
+export interface CoinHistoryResponse {
+  prices: [number, number][]; // [timestamp, price]
+  market_caps: [number, number][]; // [timestamp, market_cap]
+  total_volumes: [number, number][]; // [timestamp, volume]
+}
+
+// Chart data point interface
+export interface PriceDataPoint {
+  timestamp: number;
+  price: number;
+  date: Date;
+}
