@@ -6,11 +6,14 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Subject, takeUntil, interval, switchMap, startWith } from 'rxjs';
 
 import { CoinGeckoService } from '../../services/coingecko.service';
 import { CoinDetails, CoinMarketData } from '../../models/coingecko.interfaces';
 import { PriceChartComponent } from '../../../shared/features/price-chart/price-chart.component';
+import { PortfolioService } from '../../services/portfolio.service';
+import { TradeDialogComponent } from '../../../shared/features/trade-dialog/trade-dialog.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -22,6 +25,7 @@ import { PriceChartComponent } from '../../../shared/features/price-chart/price-
     MatChipsModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
+    MatDialogModule,
     PriceChartComponent
   ],
   template: `
@@ -145,6 +149,51 @@ import { PriceChartComponent } from '../../../shared/features/price-chart/price-
           </div>
           <div class="last-updated" *ngIf="selectedCoinDetail.last_updated">
             <small>Last updated: {{ selectedCoinDetail.last_updated | date:'medium' }}</small>
+          </div>
+          
+          <!-- Trading Actions -->
+          <div class="trading-actions">
+            <button mat-raised-button 
+                    color="primary" 
+                    (click)="openTradeDialog('buy')"
+                    class="trade-button">
+              <mat-icon>add</mat-icon>
+              Buy {{ selectedCoinDetail.symbol.toUpperCase() }}
+            </button>
+            <button mat-raised-button 
+                    color="warn" 
+                    (click)="openTradeDialog('sell')"
+                    class="trade-button"
+                    [disabled]="!hasHolding(selectedCoinDetail.id)">
+              <mat-icon>remove</mat-icon>
+              Sell {{ selectedCoinDetail.symbol.toUpperCase() }}
+            </button>
+          </div>
+          
+          <!-- Current Holdings for Selected Coin -->
+          <div class="current-holding" *ngIf="getCurrentHolding(selectedCoinDetail.id) as holding">
+            <h4>Your {{ selectedCoinDetail.name }} Holdings</h4>
+            <div class="holding-details">
+              <div class="holding-item">
+                <span class="label">Quantity:</span>
+                <span class="value">{{ holding.quantity | number:'1.0-8' }} {{ selectedCoinDetail.symbol.toUpperCase() }}</span>
+              </div>
+              <div class="holding-item">
+                <span class="label">Avg. Buy Price:</span>
+                <span class="value">{{ holding.purchasePrice | currency:'USD':'symbol':'1.2-6' }}</span>
+              </div>
+              <div class="holding-item">
+                <span class="label">Current Value:</span>
+                <span class="value">{{ (holding.quantity * holding.currentPrice) | currency:'USD':'symbol':'1.2-2' }}</span>
+              </div>
+              <div class="holding-item">
+                <span class="label">P&L:</span>
+                <span class="value" [class.positive]="getHoldingPnL(holding) >= 0" [class.negative]="getHoldingPnL(holding) < 0">
+                  {{ getHoldingPnL(holding) | currency:'USD':'symbol':'1.2-2' }}
+                  ({{ getHoldingPnLPercentage(holding) | number:'1.2-2' }}%)
+                </span>
+              </div>
+            </div>
           </div>
         </mat-card-content>
       </mat-card>
@@ -352,6 +401,52 @@ import { PriceChartComponent } from '../../../shared/features/price-chart/price-
       height: 16px;
     }
 
+    .trading-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin: 24px 0;
+    }
+
+    .trade-button {
+      min-width: 140px;
+    }
+
+    .current-holding {
+      margin-top: 24px;
+      padding: 16px;
+      background-color: var(--bg-secondary, #f5f5f5);
+      border-radius: 8px;
+    }
+
+    .current-holding h4 {
+      margin: 0 0 16px 0;
+      color: var(--text-primary, #333);
+    }
+
+    .holding-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+    }
+
+    .holding-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+    }
+
+    .holding-item .label {
+      font-weight: 500;
+      color: var(--text-secondary, #666);
+    }
+
+    .holding-item .value {
+      font-weight: bold;
+      color: var(--text-primary, #333);
+    }
+
     @media (max-width: 768px) {
       .dashboard-container {
         padding: 16px;
@@ -397,7 +492,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   constructor(
     private coinGeckoService: CoinGeckoService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private dialog: MatDialog,
+    private portfolioService: PortfolioService
   ) {}
 
   ngOnInit(): void {
@@ -650,5 +747,57 @@ export class DashboardComponent implements OnInit, OnDestroy {
       duration: 5000,
       panelClass: ['error-snackbar']
     });
+  }
+
+  openTradeDialog(type: 'buy' | 'sell'): void {
+    if (!this.selectedCoinDetail) return;
+
+    const availableQuantity = this.getCurrentHolding(this.selectedCoinDetail.id)?.quantity || 0;
+
+    const dialogRef = this.dialog.open(TradeDialogComponent, {
+      width: '500px',
+      data: {
+        coinId: this.selectedCoinDetail.id,
+        coinName: this.selectedCoinDetail.name,
+        coinSymbol: this.selectedCoinDetail.symbol,
+        coinImage: this.selectedCoinDetail.image,
+        currentPrice: this.selectedCoinDetail.current_price,
+        availableQuantity: availableQuantity
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && result.success) {
+        const message = result.type === 'buy' 
+          ? `Successfully bought ${result.quantity} ${this.selectedCoinDetail?.symbol.toUpperCase()}`
+          : `Successfully sold ${result.quantity} ${this.selectedCoinDetail?.symbol.toUpperCase()}`;
+        
+        this.snackBar.open(message, 'Close', { duration: 3000 });
+      } else if (result && !result.success) {
+        this.snackBar.open(result.error || 'Transaction failed', 'Close', { duration: 3000 });
+      }
+    });
+  }
+
+  hasHolding(coinId: string): boolean {
+    const holding = this.portfolioService.getCoinHolding(coinId);
+    return holding !== undefined && holding.quantity > 0;
+  }
+
+  getCurrentHolding(coinId: string) {
+    return this.portfolioService.getCoinHolding(coinId);
+  }
+
+  getHoldingPnL(holding: any): number {
+    const purchaseValue = holding.quantity * holding.purchasePrice;
+    const currentValue = holding.quantity * holding.currentPrice;
+    return currentValue - purchaseValue;
+  }
+
+  getHoldingPnLPercentage(holding: any): number {
+    const purchaseValue = holding.quantity * holding.purchasePrice;
+    const currentValue = holding.quantity * holding.currentPrice;
+    if (purchaseValue === 0) return 0;
+    return ((currentValue - purchaseValue) / purchaseValue) * 100;
   }
 }

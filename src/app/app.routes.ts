@@ -6,6 +6,10 @@ export const routes: Routes = [
     loadComponent: () => import('./core/features/crypto-market/dashboard.component').then(c => c.DashboardComponent)
   },
   {
+    path: 'portfolio',
+    loadComponent: () => import('./shared/features/portfolio/portfolio.component').then(c => c.PortfolioComponent)
+  },
+  {
     path: 'about',
     loadComponent: () => import('./shared/features/about.component').then(c => c.AboutComponent)
   },
