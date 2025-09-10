@@ -2,6 +2,8 @@
 
 A modern real-time cryptocurrency dashboard built with Angular and RxJS. This project fetches live market data from the CoinGecko API and displays it using interactive charts and tables. Perfect for practicing real-world Angular patterns like HTTP communication, reactive forms, observable streams, and chart integration.
 
+🌐 **Live Demo**: [https://crypto-currency-dashboard-tds.netlify.app/](https://crypto-currency-dashboard-tds.netlify.app/)
+
 ![screenshot](screenshot.png) <!-- Replace with actual screenshot -->
 
 ## 🚀 Features
